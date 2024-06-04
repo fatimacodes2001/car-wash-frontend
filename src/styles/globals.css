@@ -105,3 +105,11 @@ a {
     color-scheme: dark;
   }
 }
+
+.no-spinner {
+  /* Hide the spinners in Chrome, Safari, Edge, and Opera */
+  -webkit-appearance: none;
+  margin: 0;
+  /* Hide the spinners in Firefox */
+  -moz-appearance: textfield;
+}

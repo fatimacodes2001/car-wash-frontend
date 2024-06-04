@@ -205,10 +205,13 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setReportData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    if (!isNaN(Number(value))) {
+      setReportData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const getLastFourWeeks = () => {
@@ -427,7 +430,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Car Count (Mon-Fri)"
                   name="carCountMonFri"
-                  type="number"
                   value={reportData.carCountMonFri}
                   onChange={handleChange}
                 />
@@ -436,7 +438,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Car Count (Sat-Sun)"
                   name="carCountSatSun"
-                  type="number"
                   value={reportData.carCountSatSun}
                   onChange={handleChange}
                 />
@@ -445,7 +446,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Retail Car Count (Mon-Fri)"
                   name="retailCarCountMonFri"
-                  type="number"
                   value={reportData.retailCarCountMonFri}
                   onChange={handleChange}
                 />
@@ -454,7 +454,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Retail Car Count (Sat-Sun)"
                   name="retailCarCountSatSun"
-                  type="number"
                   value={reportData.retailCarCountSatSun}
                   onChange={handleChange}
                 />
@@ -463,7 +462,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Retail Revenue (Mon-Fri)"
                   name="retailRevenueMonFri"
-                  type="number"
                   value={reportData.retailRevenueMonFri}
                   onChange={handleChange}
                 />
@@ -472,7 +470,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Retail Revenue (Sat-Sun)"
                   name="retailRevenueSatSun"
-                  type="number"
                   value={reportData.retailRevenueSatSun}
                   onChange={handleChange}
                 />
@@ -481,7 +478,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Total Revenue (Mon-Fri)"
                   name="totalRevenueMonFri"
-                  type="number"
                   value={reportData.totalRevenueMonFri}
                   onChange={handleChange}
                 />
@@ -490,7 +486,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Total Revenue (Sat-Sun)"
                   name="totalRevenueSatSun"
-                  type="number"
                   value={reportData.totalRevenueSatSun}
                   onChange={handleChange}
                 />
@@ -499,7 +494,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Staff Hours (Mon-Fri)"
                   name="staffHoursMonFri"
-                  type="number"
                   value={reportData.staffHoursMonFri}
                   onChange={handleChange}
                 />
@@ -508,7 +502,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Staff Hours (Sat-Sun)"
                   name="staffHoursSatSun"
-                  type="number"
                   value={reportData.staffHoursSatSun}
                   onChange={handleChange}
                 />
@@ -517,7 +510,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Total Club Plans Sold"
                   name="totalClubPlansSold"
-                  type="number"
                   value={reportData.totalClubPlansSold}
                   onChange={handleChange}
                 />
@@ -526,7 +518,6 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
                   margin="normal"
                   label="Total Club Plan Members"
                   name="totalClubPlanMembers"
-                  type="number"
                   value={reportData.totalClubPlanMembers}
                   onChange={handleChange}
                 />
