@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useUser } from "../contexts/UserContext";
+import dayjs from "dayjs";
+import weekday from "dayjs/plugin/weekday";
 import {
   Box,
   Button,
@@ -9,31 +11,42 @@ import {
   Container,
   CircularProgress,
   Alert,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import TopBar from "@/components/TopBar";
 import axios from "axios";
+import MUIDataTable from "mui-datatables";
 import generateReport from "@/utils/generateReport";
 
-const Admin: React.FC = () => {
+dayjs.extend(weekday);
+
+const Admin = () => {
   const router = useRouter();
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [selectedWeek, setSelectedWeek] = useState("");
+  const [reportAvailability, setReportAvailability] = useState([]);
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token || (user && user.role !== "ADMIN")) {
+    if (!user || user.role !== "ADMIN") {
       router.push("/");
     }
-  }, [router, user]);
+  }, [user, router]);
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  useEffect(() => {
+    if (selectedWeek) {
+      fetchReportAvailability();
+    }
+  }, [selectedWeek]);
 
   const handleDownloadReport = async () => {
     setLoading(true);
-    setMessage(null);
-    setError(null);
+    setMessage("");
+    setError("");
     try {
       const [reportsResponse, locationsResponse] = await Promise.all([
         axios.get(`${backendUrl}/reports`, {
@@ -65,6 +78,66 @@ const Admin: React.FC = () => {
     }
   };
 
+  const fetchReportAvailability = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/report-availability/${selectedWeek}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      setReportAvailability(response.data);
+    } catch (error) {
+      console.error("Error fetching report availability:", error);
+      setError("Failed to fetch report availability.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWeekChange = (event: any) => {
+    setSelectedWeek(event.target.value);
+  };
+
+  const getLastFourWeeks = () => {
+    const today = dayjs();
+    const lastMonday = today.day(today.day() >= 1 ? 1 : -6);
+    const weeks = [];
+    for (let i = 0; i < 4; i++) {
+      const startOfWeek = lastMonday.subtract(i, "week");
+      weeks.push({
+        label: `${startOfWeek.format("MMM D, YYYY")} - ${startOfWeek
+          .add(6, "day")
+          .format("MMM D, YYYY")}`,
+        value: startOfWeek.format("YYYY-MM-DD"),
+      });
+    }
+    return weeks.reverse();
+  };
+
+  const columns = [
+    {
+      name: "name",
+      label: "Location",
+    },
+    {
+      name: "isDataAvailable",
+      label: "Data Available",
+      options: {
+        customBodyRender: (value: string) => (value ? "✅" : "❌"),
+      },
+    },
+  ];
+
+  const options = {
+    filterType: "checkbox",
+    responsive: "standard",
+    selectableRows: "none",
+    rowsPerPage: 5,
+  };
+
   return (
     <Box>
       <TopBar />
@@ -74,7 +147,6 @@ const Admin: React.FC = () => {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
-          width: "100vw",
           backgroundColor: "#fff",
           paddingTop: "64px",
         }}
@@ -88,33 +160,44 @@ const Admin: React.FC = () => {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              height: "200px",
             }}
           >
-            <Typography component="h1" variant="h5" mb="20px">
+            <Typography component="h1" variant="h5">
               Admin Interface
             </Typography>
-            {loading ? (
-              <CircularProgress />
-            ) : (
-              <Button
-                variant="contained"
-                onClick={handleDownloadReport}
-                sx={{ padding: "10px 20px" }}
-              >
-                Download Report
-              </Button>
+            <Button
+              variant="contained"
+              onClick={handleDownloadReport}
+              sx={{ mt: 2, mb: 2 }}
+            >
+              Download Report
+            </Button>
+            <Select
+              value={selectedWeek}
+              onChange={handleWeekChange}
+              displayEmpty
+              fullWidth
+              sx={{ mb: 2 }}
+              inputProps={{ "aria-label": "Without label" }}
+            >
+              {getLastFourWeeks().map((week) => (
+                <MenuItem key={week.value} value={week.value}>
+                  {week.label}
+                </MenuItem>
+              ))}
+            </Select>
+            {selectedWeek && (
+              <MUIDataTable
+                title={"Report Availability"}
+                data={reportAvailability}
+                columns={columns}
+                options={options as any}
+              />
             )}
-            {message && (
-              <Alert severity="success" sx={{ mt: 2 }}>
-                {message}
-              </Alert>
-            )}
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
+
+            {loading && <CircularProgress />}
+            {message && <Alert severity="success">{message}</Alert>}
+            {error && <Alert severity="error">{error}</Alert>}
           </Paper>
         </Container>
       </Box>

@@ -141,7 +141,11 @@ const MultiStepForm: React.FC<MultiStepFormProps> = ({
 
   const handleNext = async () => {
     if (activeStep === 0 && selectedLocation !== managerLocationId) {
-      setAlertMessage("Please choose your own assigned location.");
+      setAlertMessage(
+        `Please choose your own assigned location (${
+          locations.find((item) => item.id === managerLocationId)?.name
+        }).`
+      );
       setAlertSeverity("warning");
       setAlertOpen(true);
 
